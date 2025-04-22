@@ -1,0 +1,1 @@
+To start react app, open integrated terminal in "App.js", then type "npm install", then "npm start"
