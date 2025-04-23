@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export default function App() {
-  const [url, setUrl]     = useState('');
+  const [url, setUrl]         = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null);
   const [error, setError]     = useState('');
@@ -11,12 +11,19 @@ export default function App() {
     setLoading(true);
     setResult(null);
     setError('');
+
+    // 1) Normalize: prepend https:// if missing
+    const fetchUrl = url.match(/^https?:\/\//i)
+      ? url
+      : `https://${url}`;
+
     try {
       const res = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: fetchUrl }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Unknown error');
       setResult(data);
@@ -32,8 +39,8 @@ export default function App() {
       <h1>Website Toxicity Checker</h1>
       <form onSubmit={submit}>
         <input
-          type="url"
-          placeholder="https://example.com"
+          type="text"
+          placeholder="example.com or https://example.com"
           value={url}
           onChange={e => setUrl(e.target.value)}
           required
@@ -54,8 +61,7 @@ export default function App() {
               : '✅ No harmful content found'}
           </h2>
           <p>
-            Score: {result.toxic_score.toFixed(3)}  
-            {' '} (threshold {result.threshold})
+            Score: {result.toxic_score.toFixed(3)} (threshold {result.threshold})
           </p>
         </div>
       )}
